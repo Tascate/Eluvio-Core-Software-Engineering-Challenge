@@ -55,6 +55,7 @@ bool SuffixArray::initializeSuffixArray()
 
 void SuffixArray::printSuffixArray()
 {
+	std::cout << "Suffix Array : ";
 	printVector(suffixArray);
 }
 
@@ -62,29 +63,27 @@ std::vector<int> SuffixArray::makeSuffixArray(std::vector<Byte>& source, std::ve
 {
 	std::cout << "Beginning to make Suffix Array of ";
 	printVector(source);
+	std::cout << std::endl;
+
 	std::vector<bool> LType = fillLTypeArray(source);
-	printVector(LType);
 
 	std::vector<int> guess = guessLMSSort(source, bucket, LType);
-	printVector(guess);
 	inducedSortL(source, guess, bucket, LType);
-	printVector(guess);
 	inducedSortS(source, guess, bucket, LType);
-	printVector(guess);
 
 	std::vector<Byte> summarySource;
 	std::vector<int> summaryOffset;
 	int summaryAlphabetSize = summariseSuffixArray(source, guess, LType, summarySource, summaryOffset);
-	printVector(summarySource);
-	printVector(summaryOffset);
 
 	std::vector<int> summarySuffixArray = makeSummarySuffixArray(summarySource, summaryAlphabetSize);
-	printVector(summarySuffixArray);
 
 	std::vector<int> finalSuffixArray = LMSsort(source, bucket, LType, summarySuffixArray, summaryOffset);
-	printVector(finalSuffixArray);
 	inducedSortL(source, finalSuffixArray, bucket, LType);
 	inducedSortS(source, finalSuffixArray, bucket, LType);
+
+	std::cout << "Completed Suffix Array of ";
+	printVector(source);
+	std::cout << std::endl;
 	return finalSuffixArray;
 }
 
@@ -122,6 +121,11 @@ std::vector<bool> SuffixArray::fillLTypeArray(const std::vector<Byte>& source)
 		else
 			target[i] = false;
 	}
+#ifdef __DEBUG
+	std::cout << "Resulting LType Array:" << std::endl;
+	printVector(target);
+	std::cout <<  std::endl
+#endif
 	return target;
 }
 
@@ -163,8 +167,11 @@ std::vector<int> SuffixArray::guessLMSSort(const std::vector<Byte>& source, std:
 {
 	std::vector<int>guessSuffixArray(source.size(), -1);
 	auto bucketTails = findBucketTails(bucket);
+#ifdef _DEBUG
+	std::cout << "Constructing Guess LMS Sort off Bucket: " << std::endl;
 	printVector(bucketTails);
-
+	std::cout << "Iterating guess array: " << std::endl;
+#endif 
 	//Bucket sort all LMS suffixes
 	for (int i = 0; i < source.size(); i++)
 	{
@@ -173,9 +180,14 @@ std::vector<int> SuffixArray::guessLMSSort(const std::vector<Byte>& source, std:
 			unsigned int bucketIndex = source[i].byte;
 			guessSuffixArray[bucketTails[bucketIndex]] = i;
 			bucketTails[bucketIndex] -= 1;
+#ifdef _DEBUG
 			printVector(guessSuffixArray);
+#endif
 		}
 	}
+#ifdef _DEBUG
+	std::cout << "Finished Guess Array Iteration\n" << std::endl;
+#endif
 	//Empty suffix goes at front
 	guessSuffixArray[0] = source.size()-1;
 	return guessSuffixArray;
@@ -185,6 +197,11 @@ std::vector<int> SuffixArray::LMSsort(const std::vector<Byte>& source, std::vect
 {
 	std::vector<int> suffixOffsets(source.size(), -1);
 	std::vector<int> bucketTails = findBucketTails(bucketSizes);
+#ifdef _DEBUG
+	std::cout << "Constructing LMS Sort on Summary Array off Bucket: " << std::endl;
+	printVector(bucketTails);
+	std::cout << "Iterating summary array: " << std::endl;
+#endif 
 
 	//Reverse order to add suffixes to respective buckets
 	for (int i = sumSuffixArray.size() - 1; i > 1; --i)
@@ -193,8 +210,13 @@ std::vector<int> SuffixArray::LMSsort(const std::vector<Byte>& source, std::vect
 		int bucketIndex = source[stringIndex].byte;
 		suffixOffsets[bucketTails[bucketIndex]] = stringIndex;
 		bucketTails[bucketIndex] -= 1;
+#ifdef _DEBUG
+		printVector(sumOffsets);
+#endif 
 	}
-
+#ifdef _DEBUG
+	std::cout << "Finished LMS Sort Iteration\n" << std::endl;
+#endif
 	//Empty suffix placement
 	suffixOffsets[0] = source.size()-1;
 	return suffixOffsets;
@@ -210,6 +232,10 @@ int SuffixArray::summariseSuffixArray(const std::vector<Byte>& source, std::vect
 	lmsNames[guessArray[0]] = currentName;
 	int lastLMSSuffixOffset = guessArray[0];
 
+#ifdef _DEBUG
+	std::cout << "Summarising Suffix Array:" << std::endl;
+#endif 
+
 	for (int i = 1; i < guessArray.size(); i++)
 	{
 		int suffixOffset = guessArray[i];
@@ -219,8 +245,9 @@ int SuffixArray::summariseSuffixArray(const std::vector<Byte>& source, std::vect
 			currentName += 1;
 		lastLMSSuffixOffset = suffixOffset;
 		lmsNames[suffixOffset] = currentName;
+#ifdef _DEBUG
 		printVector(lmsNames);
-
+#endif 
 	}
 
 	for (int i = 0; i < lmsNames.size(); i++)
@@ -234,6 +261,13 @@ int SuffixArray::summariseSuffixArray(const std::vector<Byte>& source, std::vect
 			targetSummarySource.push_back(b);
 		}
 	}
+#ifdef _DEBUG
+	std::cout << "Resulting Summary String: ";
+	printVector(targetSummarySource);
+	std::cout << "Resulting Summary Offsets: ";
+	printVector(targetSummaryOffset);
+	std::cout << "Finished summarising\n" << std::endl;
+#endif 
 	return currentName + 1;
 }
 
@@ -241,6 +275,9 @@ std::vector<int> SuffixArray::makeSummarySuffixArray(std::vector<Byte>& summaryS
 {
 	if (summaryAlphabetSize == summarySource.size())
 	{
+#ifdef _DEBUG
+		std::cout << "Constructing Summary Suffix Array" << std::endl;
+#endif 
 		std::vector<int> summarySuffixArray(summarySource.size()+1);
 		summarySuffixArray[0] = summarySource.size();
 
@@ -248,26 +285,38 @@ std::vector<int> SuffixArray::makeSummarySuffixArray(std::vector<Byte>& summaryS
 		{
 			summarySuffixArray[summarySource[i].byte + 1] = i;
 		}
+#ifdef _DEBUG
+		std::cout << "Resulting Summary Suffix Array: ";
+		printVector(summarySuffixArray);
+#endif 
 		return summarySuffixArray;
 	}
 	else {
+#ifdef _DEBUG
+		std::cout << "Starting Suffix Array Recursion" << std::endl;
+#endif 
 		std::vector<int> bucket = fillBucket(summarySource, summaryAlphabetSize);
 		return makeSuffixArray(summarySource, bucket);
 	}
 }
 
-void SuffixArray::inducedSortL(const std::vector<Byte>& source, std::vector<int>& guessArray, std::vector<int>& bucket, const std::vector<bool>& Ltype)
+void SuffixArray::inducedSortL(const std::vector<Byte>& source, std::vector<int>& target, std::vector<int>& bucket, const std::vector<bool>& Ltype)
 {
 	auto bucketHeads = findBucketHeads(bucket);
+#ifdef _DEBUG
+	std::cout << "Induced Sort on L-Type suffixes off Bucket: " << std::endl;
+	printVector(bucketHeads);
+	std::cout << "Iterating array: " << std::endl;
+#endif 
 
-	for (auto i = 0U; i < guessArray.size(); i++)
+	for (auto i = 0U; i < target.size(); i++)
 	{
 		//Looking for L-Type
-		if (guessArray[i] == -1)
+		if (target[i] == -1)
 			//No offset
 			continue;
 		//Look at suffix beginning to left
-		int j = guessArray[i] - 1;
+		int j = target[i] - 1;
 		if (j < 0)
 			//J is out of bounds
 			continue;
@@ -278,18 +327,28 @@ void SuffixArray::inducedSortL(const std::vector<Byte>& source, std::vector<int>
 		//Offset J is a L-Type suffix
 		//Place it at bucket index
 		unsigned int bucketIndex = source[j].byte;
-		guessArray[bucketHeads[bucketIndex]] = j; //
+		target[bucketHeads[bucketIndex]] = j; //
 		bucketHeads[bucketIndex] += 1; //increment head pointer
+#ifdef _DEBUG
+		printVector(target);
+#endif 
 	}
+#ifdef _DEBUG
+	std::cout << "Finished Induced Sort for L-Type Suffixes\n" << std::endl;
+#endif
 }
 
-void SuffixArray::inducedSortS(const std::vector<Byte>& source, std::vector<int>& guessArray, std::vector<int>& bucket, const std::vector<bool>& Ltype)
+void SuffixArray::inducedSortS(const std::vector<Byte>& source, std::vector<int>& target, std::vector<int>& bucket, const std::vector<bool>& Ltype)
 {
 	auto bucketTails = findBucketTails(bucket);
-
-	for (long i = guessArray.size()-1; i >= 0; i--)
+#ifdef _DEBUG
+	std::cout << "Induced Sort on S-Type suffixes off Bucket: " << std::endl;
+	printVector(bucketTails);
+	std::cout << "Iterating array: " << std::endl;
+#endif 
+	for (long i = target.size()-1; i >= 0; i--)
 	{
-		int j = guessArray[i] - 1;
+		int j = target[i] - 1;
 		if (j < 0)
 			//J is out of bounds
 			continue;
@@ -300,10 +359,15 @@ void SuffixArray::inducedSortS(const std::vector<Byte>& source, std::vector<int>
 		//Offset j is a S-Type suffix
 		//Place suffix at bucket index
 		unsigned int bucketIndex = source[j].byte;
-		guessArray[bucketTails[bucketIndex]] = j; //
+		target[bucketTails[bucketIndex]] = j; //
 		bucketTails[bucketIndex] -= 1; //increment head pointer
-		printVector(guessArray);
+#ifdef _DEBUG
+		printVector(target);
+#endif 
 	}
+#ifdef _DEBUG
+	std::cout << "Finished Induced Sort for S-Type Suffixes\n" << std::endl;
+#endif
 }
 
 bool SuffixArray::isLMSChar(unsigned int offset, const std::vector<bool>& Ltype)
@@ -346,11 +410,16 @@ std::vector<int> SuffixArray::makeLCPArray()
 	std::vector<int> lcp(length, 0);
 	std::vector<int> invertedSuffixArray(length, 0);
 
-	
 	int l = 0;
 	for (int i = 0; i < length; i++)
 		invertedSuffixArray[suffixArray[i]] = i;
+
+#ifdef _DEBUG
+	std::cout << "- Constructing LCP Array -" << std::endl;
+	std::cout << "Inverted Suffix Array:" << std::endl;
 	printVector(invertedSuffixArray);
+	std::cout << "Iterating LCP Array: " << std::endl;
+#endif 
 	for (int i = 0; i < length - 1; i++)
 	{
 		int k = invertedSuffixArray[i];
@@ -360,10 +429,29 @@ std::vector<int> SuffixArray::makeLCPArray()
 		lcp[k] = l;
 		if (l > 0)
 			l -= 1;
+#ifdef _DEBUG
 		printVector(lcp);
+#endif
 	}
-	printVector(lcp);
 	return lcp;
+#ifdef _DEBUG
+	std::cout << "Finished LCP Array Construction\n" << std::endl;
+#endif
+}
+
+void SuffixArray::findLongestCommonStrand(int)
+{
+	std::vector<int> lcp = makeLCPArray();
+	unsigned int length = lcp.size();
+	unsigned int window1 = 1;
+	unsigned int window2 = 1;
+	for (int i = 1; i < length; i++)
+	{
+		if (true)
+			window1++;
+		else
+			window2++;
+	}
 }
 
 template <typename T>
