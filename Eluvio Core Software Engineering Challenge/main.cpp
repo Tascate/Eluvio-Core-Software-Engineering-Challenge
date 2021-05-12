@@ -13,11 +13,10 @@ void printVector(std::vector<int>);
 
 int main()
 {
-    std::cout << "Hello World!\n";
-    std::vector<int> test = testSuffixArray();
+    //std::vector<int> test = testSuffixArray();
     //std::vector<bool> hi(200);
     //std::cout << hi.size() << std::endl;
-    printVector(test);
+    //printVector(test);
     SuffixArray test1;
     test1.addString("cabbage");
     test1.addString("idontevenknow");
