@@ -130,9 +130,9 @@ std::vector<int> SuffixArray::findBucketHeads(std::vector<int>& bucket)
 	unsigned int offset = 0; //Suffix for Sentinel Characters start at the beginning
 	unsigned int length = bucket.size();
 	std::vector<int> result(length);
-	for (auto i = maxAlphabetSize; i < sentinelCharacter && i < bucket.size(); i++)
+	for (auto i = sentinelCharacter-1; i >= maxAlphabetSize && i < bucket.size(); i--)
 	{
-		result[i] == offset++;
+		result[i] = offset++;
 	}
 	for (auto i = 0; i < maxAlphabetSize && i < bucket.size(); i++)
 	{
@@ -147,9 +147,9 @@ std::vector<int> SuffixArray::findBucketTails(std::vector<int>& bucket)
 	unsigned int offset = 0; //Suffix for Sentinel Characters start at the beginning
 	unsigned int length = bucket.size();
 	std::vector<int> result(length);
-	for (auto i = maxAlphabetSize; i < sentinelCharacter && i < bucket.size(); i++)
+	for (auto i = sentinelCharacter - 1; i >= maxAlphabetSize && i < bucket.size(); i--)
 	{
-		result[i] == offset++;
+		result[i] = offset++;
 	}
 	for (auto i = 0; i < maxAlphabetSize && i < bucket.size(); i++)
 	{
@@ -170,9 +170,10 @@ std::vector<int> SuffixArray::guessLMSSort(const std::vector<Byte>& source, std:
 	{
 		if (isLMSChar(i, Ltype))
 		{
-			unsigned char bucketIndex = source[i].byte;
+			unsigned int bucketIndex = source[i].byte;
 			guessSuffixArray[bucketTails[bucketIndex]] = i;
 			bucketTails[bucketIndex] -= 1;
+			printVector(guessSuffixArray);
 		}
 	}
 	//Empty suffix goes at front
@@ -276,7 +277,7 @@ void SuffixArray::inducedSortL(const std::vector<Byte>& source, std::vector<int>
 
 		//Offset J is a L-Type suffix
 		//Place it at bucket index
-		unsigned char bucketIndex = source[j].byte;
+		unsigned int bucketIndex = source[j].byte;
 		guessArray[bucketHeads[bucketIndex]] = j; //
 		bucketHeads[bucketIndex] += 1; //increment head pointer
 	}
@@ -298,7 +299,7 @@ void SuffixArray::inducedSortS(const std::vector<Byte>& source, std::vector<int>
 
 		//Offset j is a S-Type suffix
 		//Place suffix at bucket index
-		unsigned char bucketIndex = source[j].byte;
+		unsigned int bucketIndex = source[j].byte;
 		guessArray[bucketTails[bucketIndex]] = j; //
 		bucketTails[bucketIndex] -= 1; //increment head pointer
 		printVector(guessArray);
