@@ -16,7 +16,7 @@ bool SuffixArray::addSource(std::istream &in)
 	//Sentinel Character attached to end of data
 	//Used in Suffix Array
 	Byte b;
-	b.byte = sentinelCharacter;
+	b.byte = sentinelCharacter++;
 	b.location = ++numStrings; //Increment numStrings
 	sources.push_back(b);
 	sourceLengths.push_back(++length);
@@ -36,7 +36,7 @@ bool SuffixArray::addString(const std::string inputString)
 	//Sentinel Character attached to end of data
 	//Used in Suffix Array
 	Byte b;
-	b.byte = sentinelCharacter;
+	b.byte = sentinelCharacter++;
 	b.location = ++numStrings; //Increment numStrings
 	sources.push_back(b);
 
@@ -47,7 +47,7 @@ bool SuffixArray::addString(const std::string inputString)
 
 bool SuffixArray::initializeSuffixArray()
 {
-	std::vector<int> bucketSize = fillBucket(sources, maxAlphabetSize+1);
+	std::vector<int> bucketSize = fillBucket(sources, maxAlphabetSize+numStrings);
 	//Store stream contents and bucketSize for each letter
 	suffixArray = makeSuffixArray(sources, bucketSize);
 	return false;
@@ -127,29 +127,35 @@ std::vector<bool> SuffixArray::fillLTypeArray(const std::vector<Byte>& source)
 
 std::vector<int> SuffixArray::findBucketHeads(std::vector<int>& bucket)
 {
-	unsigned int offset = bucket[bucket.size() - 1]; //Suffix for Sentinel Characters start at the beginning
-	std::vector<int> result;
-	for (auto i = bucket.begin(); i != bucket.end()-1; i++)
+	unsigned int offset = 0; //Suffix for Sentinel Characters start at the beginning
+	unsigned int length = bucket.size();
+	std::vector<int> result(length);
+	for (auto i = maxAlphabetSize; i < sentinelCharacter && i < bucket.size(); i++)
 	{
-		result.push_back(offset);
-		offset += *i;
+		result[i] == offset++;
 	}
-	//Special Case - Sentinal Characters bucket index
-	result.push_back(1); 
+	for (auto i = 0; i < maxAlphabetSize && i < bucket.size(); i++)
+	{
+		result[i] = offset;
+		offset += bucket[i];
+	}
 	return result;
 }
 
 std::vector<int> SuffixArray::findBucketTails(std::vector<int>& bucket)
 {
-	int offset = bucket[bucket.size() -1];
-	std::vector<int> result;
-	for (auto i = bucket.begin(); i != bucket.end()-1; i++)
+	unsigned int offset = 0; //Suffix for Sentinel Characters start at the beginning
+	unsigned int length = bucket.size();
+	std::vector<int> result(length);
+	for (auto i = maxAlphabetSize; i < sentinelCharacter && i < bucket.size(); i++)
 	{
-		offset += *i;
-		result.push_back(offset - 1);
+		result[i] == offset++;
 	}
-	//Special Case - Sentinal Characters bucket index
-	result.push_back(1);
+	for (auto i = 0; i < maxAlphabetSize && i < bucket.size(); i++)
+	{
+		offset += bucket[i];
+		result[i] = offset - 1;
+	}
 	return result;
 }
 

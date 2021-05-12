@@ -16,3 +16,8 @@ Construct LCP Array using Kasher's algorithim
 		resulting prefix found in atleast two files
 			return offset + file location
 	Don't have to look in source file of the current prefix?
+
+What to do when doing Unique Sentinel Characters
+	When comparing source[i], check if it is sentinel
+	Bucket tails/heads should have indexes for each sentinel character
+		should be done before moving on to other characters
