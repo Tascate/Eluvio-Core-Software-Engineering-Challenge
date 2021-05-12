@@ -351,11 +351,11 @@ std::vector<int> SuffixArray::makeLCPArray()
 	for (int i = 0; i < length; i++)
 		invertedSuffixArray[suffixArray[i]] = i;
 	printVector(invertedSuffixArray);
-	for (int i = 0; i < length - numStrings; i++)
+	for (int i = 0; i < length - 1; i++)
 	{
 		int k = invertedSuffixArray[i];
 		int j = suffixArray[k - 1];
-		while (i+k<length && j+k<length && sources[i + l].byte == sources[j + l].byte)
+		while (sources[i + l].byte == sources[j + l].byte)
 			l += 1;
 		lcp[k] = l;
 		if (l > 0)
