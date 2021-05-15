@@ -2,7 +2,6 @@
 //
 
 #include <iostream>
-#include <vector>
 #include <algorithm>
 #include "suffixarray.h"
 
@@ -18,11 +17,21 @@ int main()
     //std::cout << hi.size() << std::endl;
     //printVector(test);
     SuffixArray test1;
-    test1.addString("cabbage");
-    test1.addString("idontevenknow");
+    test1.addString("fouree");
+    test1.addString("houraa");
+    test1.addString("bourrr");
+    test1.addString("sourbb");
+
+
     test1.initializeSuffixArray();
     test1.printSuffixArray();
     std::vector<int> lcp = test1.makeLCPArray();
+
+    std::set<int> result;
+    int max = test1.findLongestCommonStrand(2,result);
+    std::cout << "Length of LCS: " << max << std::endl;
+    for (auto it = result.cbegin(); it != result.cend(); it++)
+        std::cout << "File " << test1.findSuffixOriginSource(*it) << ", Offset: " << *it << std::endl;
 }
 
 void printVector(std::vector<int> v)
