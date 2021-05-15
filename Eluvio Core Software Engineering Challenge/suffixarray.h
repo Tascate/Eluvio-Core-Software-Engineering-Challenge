@@ -6,7 +6,7 @@
 
 /*
 	Suffix-Array Implementation in C++
-	Understanding and overall Implementation from https://zork.net/~st/jottings/sais.html
+	Using Skew & Kasai Algorithim
 */
 class SuffixArray
 {
