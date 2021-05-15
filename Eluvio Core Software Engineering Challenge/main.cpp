@@ -20,18 +20,14 @@ int main()
         fin.close();
     }
     sa.initializeSuffixArray();
-    for (int i = 0; i < 10; i++)
-    {
-        std::cout << sa.suffixArray[i] << std::endl;
-    }
-
     std::set<int> result;
     int max = sa.findLongestCommonStrand(2,result);
-    std::cout << "Length of LCS: " << max << std::endl;
+    std::cout << "Length of Longest Common Strand: " << max << std::endl;
+    std::cout << "Located in:" << std::endl;
     for (auto it = result.cbegin(); it != result.cend(); it++)
     {
         int origin = sa.findSuffixOriginSource(*it);
-        std::cout << "File " << origin << ", Offset: " << sa.findTrueSuffixOffset(origin, *it) << std::endl;
+        std::cout << fileName << origin << " Offset: " << sa.findTrueSuffixOffset(origin, *it) << std::endl;
     }
     return 0;
 }
