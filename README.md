@@ -13,7 +13,7 @@ The specific algorithm used is the **Kasai Algorithm** which has time complexity
 In my code, the LCP Array is calculated after the Suffix Array construction but is also capable of being calculated in-place with the **Skew Algorithm**. This would further optimize the program but for ease of coding and understanding, I decided to calculate LCP after.
 
 ### Longest Common Strand for K-files
-A sliding window over the LCP Array from **i** to **j** is used. Whenever the sliding window has suffixes for at least **k-files**, the LCP value for the current sliding window is the minimum LCP value from **i+1** to **j**. The maximum length and offsets are kept track of while iterating.
+A sliding window over the LCP Array from **i** to **j** is used. Whenever the sliding window has suffixes for at least **k-files**, the LCP value for the current sliding window is the minimum LCP value from **i+1** to **j**. The maximum LCP value for **k-files** and corresponding offsets are kept track of while iterating.
 
 Finding out the parent file for a given suffix takes **O(logm)** time and **O(1)** space using binary search.
 
