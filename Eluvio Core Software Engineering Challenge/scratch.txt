@@ -1,0 +1,28 @@
+ScratchPaper
+Suffix Array + LCP Approach to this
+Notes:
+	255 alphabet size (possible values of one Byte)
+	Must note where it occurs in all files
+	Result must be found in atleast two files
+Create Suffix Array using Kasai
+	Use with Sentinel Characters
+
+What to do when doing Unique Sentinel Characters
+	When comparing source[i], check if it is sentinel
+	Bucket tails/heads should have indexes for each sentinel character
+		should be done before moving on to other characters
+Longest Common Substring Algorithim for k-substrings
+	Get LCP Array
+	Keep track of minimum value of sliding window from window1+1 to window2
+	while both window1 and window2 are in range of lcp array
+		If window1 first character == window2 first character andcthere are suffixes from atleast k-unique locations
+			If min value > current max value
+				max = min
+			decrement the sum of suffixes in a location map for key location of window1
+			increase window1
+			update min value if needed
+		else 
+			increase window2
+			increment the sum of suffixes in a location map for key location of window2
+			update min value if needed
+			

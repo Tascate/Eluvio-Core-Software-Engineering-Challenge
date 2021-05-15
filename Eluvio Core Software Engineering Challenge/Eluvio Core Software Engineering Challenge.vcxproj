@@ -146,7 +146,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="text.txt" />
+    <Text Include="scratch.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="suffixarray.h" />
