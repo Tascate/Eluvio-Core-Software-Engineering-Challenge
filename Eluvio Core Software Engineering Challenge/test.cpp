@@ -29,6 +29,7 @@ int test()
         int origin = test1.findSuffixOriginSource(*it);
         std::cout << "File " << origin << ", Offset: " << test1.findTrueSuffixOffset(origin, *it) << std::endl;
     }
+    return 0;
 }
 
 void printVector(std::vector<int> v)

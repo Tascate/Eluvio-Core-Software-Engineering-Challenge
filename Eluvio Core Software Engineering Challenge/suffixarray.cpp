@@ -3,9 +3,13 @@
 bool SuffixArray::addSource(std::istream &in)
 {
 	//Read in all data from a stream
+	in.seekg(0, std::ios::end);
+	int length = in.tellg();
+	in.seekg(0, std::ios::beg);
 	unsigned char letter;
-	while (in >> letter)
+	for (int i = 0; i < length; i++)
 	{
+		in.read(reinterpret_cast<char *>(&letter), sizeof(letter));
 		sources.push_back((int)letter);
 	}
 	//Sentinel Character attached to end of data

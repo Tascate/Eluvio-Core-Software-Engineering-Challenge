@@ -15,7 +15,7 @@ int main()
     
     for (int i = 1; i <= numFiles; i++)
     {
-        std::ifstream fin(fileName + std::to_string(i), std::ios::binary);
+        std::ifstream fin(fileName + std::to_string(i), std::ios::binary | std::ios::in);
         sa.addSource(fin);
         fin.close();
     }
