@@ -23,8 +23,9 @@ public:
 	bool initializeSuffixArray();
 	void printSuffixArray();
 	std::vector<int> makeLCPArray();
-	int findLongestCommonStrand(const int, std::set<int>&);
+	int findLongestCommonStrand(const unsigned int, std::set<int>&);
 	int findSuffixOriginSource(int offset);
+	int findTrueSuffixOffset(int location, int offset);
 
 private:
 	void skewSuffixArray(const std::vector<int>&, std::vector<int>&, int, int, int);

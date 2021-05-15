@@ -3,10 +3,10 @@
 bool SuffixArray::addSource(std::istream &in)
 {
 	//Read in all data from a stream
-	unsigned int letter;
+	unsigned char letter;
 	while (in >> letter)
 	{
-		sources.push_back(letter);
+		sources.push_back((int)letter);
 	}
 	//Sentinel Character attached to end of data
 	//Used in Suffix Array and LCP Construction
@@ -187,6 +187,13 @@ int SuffixArray::findSuffixOriginSource(int offset)
 
 }
 
+int SuffixArray::findTrueSuffixOffset(int location, int offset)
+{
+	if (location == 1)
+		return offset;
+	return offset - suffixArray[numStrings + 1 - location]-1;
+}
+
 /*
 	Constructs LCP Array using Kasai's Algorithim
 */
@@ -232,7 +239,7 @@ std::vector<int> SuffixArray::makeLCPArray()
 	Finds Longest Common Strand that appears in k substrings
 	Returns length of LCS and saves offsets to a set
 */
-int SuffixArray::findLongestCommonStrand(const int k, std::set<int> &offsets)
+int SuffixArray::findLongestCommonStrand(const unsigned int k, std::set<int> &offsets)
 {
 	if (k < 2)
 	{
@@ -287,7 +294,7 @@ int SuffixArray::findLongestCommonStrand(const int k, std::set<int> &offsets)
 			*/
 			if (++index1 == currentMinIndex) {
 				currentMinIndex = index1 + 1;
-				for (int i = index1 + 2; i <= index2; i++)
+				for (auto i = index1 + 2; i <= index2; i++)
 					if (lcp[currentMinIndex] > lcp[i])
 						currentMinIndex = i;
 			}
@@ -307,7 +314,7 @@ int SuffixArray::findLongestCommonStrand(const int k, std::set<int> &offsets)
 		int suffix1 = suffixArray[index1];
 		decrementIndex(suffixSourcesMap, findSuffixOriginSource(suffix1-1));
 		currentMinIndex = index1 + 1;
-		for (int i = index1 + 1; i <= index2; i++)
+		for (auto i = index1 + 1; i <= index2; i++)
 			if (lcp[currentMinIndex] > lcp[i])
 				currentMinIndex = i;
 		//Only need to check if the first byte of the suffix is equal
