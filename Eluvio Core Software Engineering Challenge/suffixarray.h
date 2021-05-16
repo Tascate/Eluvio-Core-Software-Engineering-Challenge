@@ -3,6 +3,7 @@
 #include <map>
 #include <set>
 #include <iostream>
+#include <fstream>
 
 /*
 	Suffix-Array Implementation in C++
@@ -18,18 +19,18 @@ private:
 	int sentinelCharacter = -1;
 
 public:
-	bool addSource(std::istream&);
-	bool addString(std::string);
-	bool initializeSuffixArray();
-	void printSuffixArray();
-	std::vector<int> makeLCPArray();
+	bool addSourceFromFile(std::string);
+	bool addSourceFromString(std::string);
+	bool constructSuffixArray();
+	std::vector<int> constructLCPArray();
 	int findLongestCommonStrand(const unsigned int, std::set<int>&);
-	int findSuffixOriginSource(int offset);
-	int findTrueSuffixOffset(int location, int offset);
+	int findSuffixParentSource(int offset);
+	int findTrueSuffixOffset(int, int offset);
+	void printSuffixArray();
 
 private:
 	void skewSuffixArray(const std::vector<int>&, std::vector<int>&, int, int, int);
-	void radixSort(std::vector<int>&, std::vector<int>&, const std::vector<int>, int, int, int, int);
+	void radixSort(std::vector<int>&, std::vector<int>&, const std::vector<int>&, int, int, int, int);
 
 	template <typename T>
 	void printVector(std::vector<T> suffixArray);

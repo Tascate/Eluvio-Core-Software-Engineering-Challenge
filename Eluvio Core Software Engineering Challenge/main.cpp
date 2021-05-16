@@ -13,20 +13,25 @@ int main()
 {
     SuffixArray sa;
     
+    //Read files in, one by one
     for (int i = 1; i <= numFiles; i++)
     {
-        std::ifstream fin(fileName + std::to_string(i), std::ios::binary | std::ios::in);
-        sa.addSource(fin);
-        fin.close();
+        sa.addSourceFromFile(fileName + std::to_string(i));
     }
-    sa.initializeSuffixArray();
+
+    //Make Suffix Array
+    sa.constructSuffixArray();
     std::set<int> result;
+
+    //Calculate LCS that appears in at least 2 files
     int max = sa.findLongestCommonStrand(2,result);
+
+    //Print results
     std::cout << "Length of Longest Common Strand: " << max << std::endl;
     std::cout << "Located in:" << std::endl;
     for (auto it = result.cbegin(); it != result.cend(); it++)
     {
-        int origin = sa.findSuffixOriginSource(*it);
+        int origin = sa.findSuffixParentSource(*it);
         std::cout << fileName << origin << " Offset: " << sa.findTrueSuffixOffset(origin, *it) << std::endl;
     }
     return 0;

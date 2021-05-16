@@ -13,20 +13,20 @@ int test()
     printVector(firstSA);
 
     SuffixArray test1;
-    test1.addString("horihjiwuoerjhuweihuiewhnuiwehuiewuiyweuiweuihuihuiwehruiewhyiurendkjzsnbva");
-    test1.addString("aorihjiwuoerjhuweihuiewhnuiwehuiewuiyweuiweuihuihuiwehruiewhyiurendkjzsnbve");
+    test1.addSourceFromString("horihjiwuoerjhuweihuiewhnuiwehuiewuiyweuiweuihuihuiwehruiewhyiurendkjzsnbva");
+    test1.addSourceFromString("aorihjiwuoerjhuweihuiewhnuiwehuiewuiyweuiweuihuihuiwehruiewhyiurendkjzsnbve");
 
 
-    test1.initializeSuffixArray();
+    test1.constructSuffixArray();
     test1.printSuffixArray();
-    std::vector<int> lcp = test1.makeLCPArray();
+    std::vector<int> lcp = test1.constructLCPArray();
 
     std::set<int> result;
     int max = test1.findLongestCommonStrand(2, result);
     std::cout << "Length of LCS: " << max << std::endl;
     for (auto it = result.cbegin(); it != result.cend(); it++)
     {
-        int origin = test1.findSuffixOriginSource(*it);
+        int origin = test1.findSuffixParentSource(*it);
         std::cout << "File " << origin << ", Offset: " << test1.findTrueSuffixOffset(origin, *it) << std::endl;
     }
     return 0;

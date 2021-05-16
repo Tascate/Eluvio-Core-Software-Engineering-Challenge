@@ -1,17 +1,28 @@
 #include "suffixarray.h"
 
-bool SuffixArray::addSource(std::istream &in)
+bool SuffixArray::addSourceFromFile(std::string fileName)
 {
-	//Read in all data from a stream
-	in.seekg(0, std::ios::end);
-	int length = in.tellg();
-	in.seekg(0, std::ios::beg);
-	unsigned char letter;
-	for (int i = 0; i < length; i++)
+	std::ifstream fin(fileName, std::ios::binary);
+	if (!fin)
 	{
-		in.read(reinterpret_cast<char *>(&letter), sizeof(letter));
-		sources.push_back((int)letter);
+		std::cerr << "Could not read file from: " << fileName << std::endl;
+		return false;
 	}
+	
+	//Do not skip whitespace characters
+	fin.unsetf(std::ios::skipws);
+	
+	//Read in size of file
+	fin.seekg(0, std::ios::end);
+	std::streampos length = fin.tellg();
+	fin.seekg(0, std::ios::beg);
+
+	//Read in all data from file
+	sources.reserve(length);
+	sources.insert(sources.end(),
+		std::istream_iterator<unsigned char>(fin),
+		std::istream_iterator<unsigned char>());
+
 	//Sentinel Character attached to end of data
 	//Used in Suffix Array and LCP Construction
 	sources.push_back(sentinelCharacter--);
@@ -19,7 +30,7 @@ bool SuffixArray::addSource(std::istream &in)
 	return true;
 }
 
-bool SuffixArray::addString(const std::string inputString)
+bool SuffixArray::addSourceFromString(const std::string inputString)
 {
 	for (auto it = inputString.cbegin(); it != inputString.cend(); it++) {
 		sources.push_back(*it);
@@ -31,17 +42,19 @@ bool SuffixArray::addString(const std::string inputString)
 	return true;
 }
 
-bool SuffixArray::initializeSuffixArray()
+bool SuffixArray::constructSuffixArray()
 {
 	suffixArray.resize(sources.size());
-	std::vector<int> sourcesCopy(sources);
 
 	//Skew Algorithim Implementation assumption
 	//See function declaration comments
-	sourcesCopy.push_back(sentinelCharacter);
-	sourcesCopy.push_back(sentinelCharacter);
-	sourcesCopy.push_back(sentinelCharacter);
-	skewSuffixArray(sourcesCopy, suffixArray, sources.size(), maxAlphabetSize, numStrings+1);
+	sources.push_back(sentinelCharacter);
+	sources.push_back(sentinelCharacter);
+	sources.push_back(sentinelCharacter);
+	skewSuffixArray(sources, suffixArray, sources.size()-3, maxAlphabetSize, numStrings+1);
+	sources.pop_back();
+	sources.pop_back();
+	sources.pop_back();
 	return true;
 }
 
@@ -64,7 +77,7 @@ void SuffixArray::skewSuffixArray(const std::vector<int> &s, std::vector<int> &S
 	std::vector<int> s0(n0);
 	std::vector<int> SA0(n0);
 
-	//Indexes of Triples for s12
+	//Create Triple Indexes for s12
 	for (int i = 0, j = 0; i < length + (n0 - n1); i++)
 		if (i % 3 != 0)
 			s12[j++] = i;
@@ -116,7 +129,7 @@ void SuffixArray::skewSuffixArray(const std::vector<int> &s, std::vector<int> &S
 	};
 	for (int p = 0, t = n0 - n1, k = 0; k < length; k++)
 	{
-		int i = SA12[t] < n0 ? SA12[t] * 3 + 1 : (SA12[t] - n0) * 3 + 2; //offset os 12 suffix
+		int i = SA12[t] < n0 ? SA12[t] * 3 + 1 : (SA12[t] - n0) * 3 + 2; //offset of 12 suffix
 		int j = SA0[p]; //offset of 0 suffix
 		if (SA12[t] < n0 ? leqPair(s[i],s12[SA12[t]+n0],s[j],s12[j/3]) : 
 			leqTriple(s[i],s[i+1],s12[SA12[t]-n0+1], s[j],s[j+1],s12[j/3+n0]))
@@ -138,15 +151,15 @@ void SuffixArray::skewSuffixArray(const std::vector<int> &s, std::vector<int> &S
 }
 
 /*
-	RadixSort
+	radixSort
 	From Skew Algorithim Implementation
 	Allows for alphabet that includes negative integers
 		Assumes alphabetOffset offsets the smallest character of the alphabet to 0
 */
-void SuffixArray::radixSort(std::vector<int>& a, std::vector<int>& b, const std::vector<int> r, int offset, int n, int alphabetSize, int alphabetOffset) 
+void SuffixArray::radixSort(std::vector<int>& a, std::vector<int>& b, const std::vector<int> &r, int offset, int length, int alphabetSize, int alphabetOffset) 
 {
 	std::vector<int> count(alphabetSize + 1+alphabetOffset,0);
-	for (int i = 0; i < n; i++)
+	for (int i = 0; i < length; i++)
 		count[r[a[i]+offset]+alphabetOffset]++;
 	for (int i = 0, sum = 0; i <= alphabetSize+alphabetOffset; i++)
 	{
@@ -154,16 +167,16 @@ void SuffixArray::radixSort(std::vector<int>& a, std::vector<int>& b, const std:
 		count[i] = sum;
 		sum += t;
 	}
-	for (int i = 0; i < n; i++)
+	for (int i = 0; i < length; i++)
 		b[count[r[a[i]+offset]+alphabetOffset]++] = a[i];
 }
 
-int SuffixArray::findSuffixOriginSource(int offset)
+int SuffixArray::findSuffixParentSource(int offset)
 {
 	//Given offset is out of range
 	if (offset > suffixArray[0])
 	{
-		std::cerr << "Out of range offset given for locateSuffx(): " << offset << std::endl;
+		std::cerr << "Offset is out of range: " << offset << std::endl;
 		return -1;
 	}
 	//Trivial answer
@@ -191,17 +204,17 @@ int SuffixArray::findSuffixOriginSource(int offset)
 
 }
 
-int SuffixArray::findTrueSuffixOffset(int location, int offset)
+int SuffixArray::findTrueSuffixOffset(int parentSource, int offset)
 {
-	if (location == 1)
+	if (parentSource == 1)
 		return offset;
-	return offset - suffixArray[numStrings + 1 - location]-1;
+	return offset - suffixArray[numStrings + 1 - parentSource]-1;
 }
 
 /*
 	Constructs LCP Array using Kasai's Algorithim
 */
-std::vector<int> SuffixArray::makeLCPArray()
+std::vector<int> SuffixArray::constructLCPArray()
 {
 	int length = suffixArray.size();
 	std::vector<int> lcp(length, 0);
@@ -212,13 +225,7 @@ std::vector<int> SuffixArray::makeLCPArray()
 	for (int i = 0; i < length; i++)
 		invertedSuffixArray[suffixArray[i]] = i;
 
-#ifdef _DEBUG
-	std::cout << "- Constructing LCP Array -" << std::endl;
-	std::cout << "Inverted Suffix Array:" << std::endl;
-	printVector(invertedSuffixArray);
-	std::cout << "Iterating LCP Array: " << std::endl;
-#endif 
-
+	//Kasai Algorithim
 	for (int i = 0; i < length - 1; i++)
 	{
 		int k = invertedSuffixArray[i];
@@ -229,13 +236,7 @@ std::vector<int> SuffixArray::makeLCPArray()
 		if (l > 0)
 			l -= 1;
 
-#ifdef _DEBUG
-		printVector(lcp);
-#endif
 	}
-#ifdef _DEBUG
-	std::cout << "Finished LCP Array Construction\n" << std::endl;
-#endif
 	return lcp;
 }
 
@@ -249,7 +250,7 @@ int SuffixArray::findLongestCommonStrand(const unsigned int k, std::set<int> &of
 	{
 		std::cout << "Given k-value invalid: " << k << std::endl;
 	}
-	std::vector<int> lcp = makeLCPArray();
+	std::vector<int> lcp = constructLCPArray();
 	unsigned int length = lcp.size();
 	unsigned int index1 = numStrings; //sliding window, first index
 	unsigned int index2 = numStrings; //sliding window, second index
@@ -260,7 +261,7 @@ int SuffixArray::findLongestCommonStrand(const unsigned int k, std::set<int> &of
 		else
 			map[index] -= 1;
 	};
-	suffixSourcesMap[findSuffixOriginSource(suffixArray[index1])] += 1;
+	suffixSourcesMap[findSuffixParentSource(suffixArray[index1])] += 1;
 
 	int max = 0;
 	int currentMinIndex = 1; //index for LCP minimum value of sliding window from index1+1 to index2
@@ -289,7 +290,7 @@ int SuffixArray::findLongestCommonStrand(const unsigned int k, std::set<int> &of
 				}
 			}
 			//Reduce sliding window
-			decrementIndex(suffixSourcesMap, findSuffixOriginSource(suffix1));
+			decrementIndex(suffixSourcesMap, findSuffixParentSource(suffix1));
 			/*
 				Update currentMinIndex to new sliding window
 				currentMinIndex may be set outside sliding window
@@ -305,7 +306,7 @@ int SuffixArray::findLongestCommonStrand(const unsigned int k, std::set<int> &of
 		}
 		//Enlarge sliding window
 		else if (++index2 + 1 < length) {
-			suffixSourcesMap[findSuffixOriginSource(suffixArray[index2])] += 1;
+			suffixSourcesMap[findSuffixParentSource(suffixArray[index2])] += 1;
 			if (lcp[index2] <= lcp[currentMinIndex])
 				currentMinIndex = index2;
 		}
@@ -316,7 +317,7 @@ int SuffixArray::findLongestCommonStrand(const unsigned int k, std::set<int> &of
 	while (++index1 < length && suffixSourcesMap.size() >= k)
 	{
 		int suffix1 = suffixArray[index1];
-		decrementIndex(suffixSourcesMap, findSuffixOriginSource(suffix1-1));
+		decrementIndex(suffixSourcesMap, findSuffixParentSource(suffix1-1));
 		currentMinIndex = index1 + 1;
 		for (auto i = index1 + 1; i <= index2; i++)
 			if (lcp[currentMinIndex] > lcp[i])
@@ -343,6 +344,7 @@ int SuffixArray::findLongestCommonStrand(const unsigned int k, std::set<int> &of
 	return max;
 }
 
+//For debug purposes
 template <typename T>
 void SuffixArray::printVector(std::vector<T> v) {
 	for (auto i = v.begin(); i != v.end(); i++)
