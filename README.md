@@ -24,7 +24,7 @@ Time complexity is O(nlogm) in the worst case; however, m is largely insignifica
 
 Space Complexity is **O(n)** to store suffix array, inverted suffix array, and the array of bytes.
 ## Compiling & Running
-The project was compiled using Visual Studio 2019. Using my computer with the Release x86 preset, the total computation time averaged around **~95ms** according to the profilier.
+The project was compiled using Visual Studio 2019. Using my computer with the Release x86 preset, the total computation time ranged an average **~82-86ms** according to the profilier.
 1. Download the Project and open Solution in VS2019
 2. Run project in the desired configuration
 3. Output is given by **length** then **files + their offsets**
